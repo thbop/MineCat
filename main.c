@@ -15,12 +15,31 @@
 #define CAMERA_SENSITIVITY 0.2f
 #define CANERA_MOVE_SPEED  0.1f
 
+// World
+#define BLOCK_SCALE 4.0f
+#define WORLD_SCALE 8
+
+// Typedefs
+typedef unsigned int u32;
+
+
+
 // Globals
 Camera3D camera;
 
 bool cursorFree;
 
+u32 blocks[WORLD_SCALE][WORLD_SCALE][WORLD_SCALE];
 
+void InitBlocks() {
+    for ( int x = 0; x < WORLD_SCALE; x++ ) {
+        for ( int y = 0; y < WORLD_SCALE; y++ ) {
+            for ( int z = 0; z < WORLD_SCALE; z++ ) {
+                blocks[x][y][z] = 1;
+            }
+        }
+    }
+}
 
 void Init() {
     InitWindow(WIDTH, HEIGHT, "MineCat");
@@ -35,6 +54,8 @@ void Init() {
     camera.fovy       = 90.0f;
     camera.projection = CAMERA_PERSPECTIVE;
 
+
+    InitBlocks();
 }
 
 void Navigate() {
@@ -63,9 +84,26 @@ void Update() {
     CursorManger();
     Navigate();
 }
-
+int blocksOnScreen;
 void Draw() {
-    DrawCubeV( (Vector3){ 0.0f, 0.0f, 0.0f }, (Vector3){ 4.0f, 4.0f, 4.0f }, GREEN );
+    blocksOnScreen = 0;
+    for ( int x = 0; x < WORLD_SCALE; x++ ) {
+        for ( int y = 0; y < WORLD_SCALE; y++ ) {
+            for ( int z = 0; z < WORLD_SCALE; z++ ) {
+                if ( blocks[x][y][z] ) {
+                    DrawCubeWiresV(
+                        (Vector3){ x*BLOCK_SCALE, y*BLOCK_SCALE, z*BLOCK_SCALE },
+                        (Vector3){ BLOCK_SCALE, BLOCK_SCALE, BLOCK_SCALE }, GREEN
+                    );
+                    blocksOnScreen++;
+                }
+            }
+        }
+    }
+}
+
+void DrawUI() {
+    DrawText(TextFormat("BLOCKS ON SCREEN: %d", blocksOnScreen), 10, 10, 20, WHITE);
 }
 
 void Unload() {
@@ -83,6 +121,7 @@ int main() {
             BeginMode3D(camera);
                 Draw();
             EndMode3D();
+            DrawUI();
         EndDrawing();
     }
 
